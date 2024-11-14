@@ -53,7 +53,7 @@ public class IndexView extends HorizontalLayout{
 
 
         add(scroller);
-        CheckoutView();
+        
         /*Dialog dialog = new Dialog();
         dialog.setHeaderTitle("Prueba de título");
         dialog.setModal(false);
@@ -61,42 +61,80 @@ public class IndexView extends HorizontalLayout{
         
     }
     
-    public void CheckoutView() {
-        // Crear el título del Card
-        H3 titulo = new H3("Checkout habitación XXX");
-
-        // Detalles del cliente
+    public void CheckoutView(Habitacion habitacion, Button habitacionBtn) {
+  
+        H3 titulo = new H3("Checkout habitación "+habitacion.getNumero());
+        VerticalLayout card = new VerticalLayout(titulo);
+  
         TextField nombreCliente = new TextField("Nombre del Cliente");
+        nombreCliente.setValue(habitacion.getNombre());
         nombreCliente.setReadOnly(true);
+        
         TextField idCliente = new TextField("Identificación");
+        idCliente.setValue(habitacion.getIdCliente());
         idCliente.setReadOnly(true);
         FormLayout detallesCliente = new FormLayout(nombreCliente, idCliente);
 
-        // Listado de servicios comprados
+  
         VerticalLayout listaServicios = new VerticalLayout();
-        listaServicios.add(new Label("Servicios Comprados:"));
-        listaServicios.add(new Label("1. Servicio de limpieza"));
-        listaServicios.add(new Label("2. Servicio de lavandería"));
-        listaServicios.add(new Label("3. Desayuno incluido"));
-        // Agrega más servicios según sea necesario
+        listaServicios.add(new Label("Productos y servicios comprados:"));
+        
+        for (int i = 0; i < habitacion.productos_usados.size(); i++) {
+            Producto producto = habitacion.productos_usados.get(i);
+            listaServicios.add(new Label("- "+producto.getNombre()+" | $"+producto.getPrecio()));
+        }
+        
+        listaServicios.add(new Label("Total productos y servicios comprados: "+habitacion.getTotalProductos()));
+        
 
-        // Campo para ingresar número de noches y botón para generar factura
         NumberField numeroNoches = new NumberField("Número de Noches");
-        Button generarFacturaButton = new Button("Generar Factura" /*event -> mostrarFacturaDialogo(nombreCliente.getValue(), idCliente.getValue(), numeroNoches.getValue())*/);
+        Button generarFacturaButton = new Button("Generar Factura" , event -> {
+            mostrarFacturaDialogo(habitacion, numeroNoches.getValue(),card );
+            habitacionBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+            habitacion.desocupar();
+        });
         generarFacturaButton.getStyle().set("margin-top", "35px");
         HorizontalLayout generarFacturaLayout = new HorizontalLayout(numeroNoches, generarFacturaButton);
 
-        // Card principal
-        VerticalLayout card = new VerticalLayout(titulo, detallesCliente, listaServicios, generarFacturaLayout);
+
+        
         card.getStyle().set("border", "1px solid #ccc"); // Borde para simular Card
         card.getStyle().set("border-radius", "8px");
         card.getStyle().set("padding", "20px");
         card.getStyle().set("width", "600px");
         card.getStyle().set("height", "900px");
         card.getStyle().set("box-shadow", "2px 2px 10px rgba(0, 0, 0, 0.1)");
-
-        // Añadir el Card al layout principal
+        card.add(detallesCliente, listaServicios, generarFacturaLayout);
         add(card);
+    }
+    
+    private void mostrarFacturaDialogo(Habitacion habitacion, Double numeroNoches, VerticalLayout card) {
+        Dialog facturaDialog = new Dialog();
+
+
+        VerticalLayout facturaLayout = new VerticalLayout();
+        facturaLayout.add(new H3("Factura"));
+        facturaLayout.add(new Label("Cliente: " + habitacion.getNombre()));
+        facturaLayout.add(new Label("Identificación: " + habitacion.getIdCliente()));
+        facturaLayout.add(new Label("Número de Noches: " + (numeroNoches != null ? numeroNoches.intValue() : 0)  ));
+        
+  
+        facturaLayout.add(new Label("Servicios:"));
+        for (int i = 0; i < habitacion.productos_usados.size(); i++) {
+            Producto producto = habitacion.productos_usados.get(i);
+            facturaLayout.add(new Label("- "+producto.getNombre()+" | $"+producto.getPrecio()));
+        }
+        
+        facturaLayout.add(new Label("Total por "+numeroNoches.intValue()+" noches: $" + (numeroNoches.intValue()*habitacion.getPrecioNoche()) ) );
+        
+        Factura factura = new Factura(habitacion, numeroNoches != null ? numeroNoches.intValue() : 0);
+        facturaLayout.add(new Label("Total: $" + factura.getTotal()) );
+
+        facturaDialog.add(facturaLayout);
+        facturaDialog.setWidth("400px");
+        //facturaDialog.setHeight("300px");
+        facturaDialog.open();
+        card.removeFromParent();
     }
     
     public ArrayList<Button> listProductosVenta(Habitacion habitacion, BiConsumer<ClickEvent<Button>, Producto> callback){
@@ -186,11 +224,16 @@ public class IndexView extends HorizontalLayout{
                                 containerProductosCuenta.add(btnList);
                                 
                                 dialogAdd.add(containerProductosCuenta);
-                                Button cerrar = new Button("Cancelar",new Icon(VaadinIcon.BAN), (ev) -> dialogAdd.close());
+                                Button cerrar = new Button("Cerrar",new Icon(VaadinIcon.BAN), (ev) -> dialogAdd.close());
                                 dialogAdd.getFooter().add( cerrar );
                                 dialogAdd.open();
                             } );
                             Button hacerCheckoutBtn = new Button("Hacer checkout", new Icon(VaadinIcon.CHECK_CIRCLE));
+                            
+                            hacerCheckoutBtn.addClickListener((event) -> {
+                                dialogOcupada.close();
+                                CheckoutView(habitacion,habitacionBtn);
+                            });
                             
                             dialogOcupada.getFooter().add(cancelBtn);
                             dialogOcupada.getFooter().add(agregaProductoBtn);

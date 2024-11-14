@@ -271,6 +271,10 @@ class Factura {
             total += producto.getPrecio();
         }
     }
+    
+    public double getTotal(){
+        return total;
+    }
 
     public void generarFactura() {
         System.out.println("Factura:");
