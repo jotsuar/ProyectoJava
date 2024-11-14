@@ -88,10 +88,19 @@ public class IndexView extends HorizontalLayout{
         
 
         NumberField numeroNoches = new NumberField("Número de Noches");
+        numeroNoches.setValue(Double.parseDouble("1"));
         Button generarFacturaButton = new Button("Generar Factura" , event -> {
-            mostrarFacturaDialogo(habitacion, numeroNoches.getValue(),card );
-            habitacionBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            habitacion.desocupar();
+            
+            if(numeroNoches.getValue().toString().equals("")){
+                mostrarNotificacion("error", "El número de noches es requerido");
+            }else{
+                mostrarFacturaDialogo(habitacion, numeroNoches.getValue(),card );
+                habitacionBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                habitacion.desocupar();
+                mostrarNotificacion("bien", "Gracias por su estadía vuelva pronto");  
+            }
+            
+            
         });
         generarFacturaButton.getStyle().set("margin-top", "35px");
         HorizontalLayout generarFacturaLayout = new HorizontalLayout(numeroNoches, generarFacturaButton);
