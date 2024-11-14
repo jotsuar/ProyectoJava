@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.mycompany.proyectofinal;
 
 import java.util.ArrayList;
@@ -136,6 +133,55 @@ class Habitacion {
     public String getTipo() {
         return tipo;
     }
+    
+    public double getTotalProductos(){
+        double totalProductos = 0;
+        for (Producto producto : productos_usados) {
+            totalProductos += producto.getPrecio();
+        }
+        return totalProductos;
+    }
+    
+    public boolean agregarProducto(String tipo,String Producto,Habitacion habitacion){
+        
+        boolean res = false;
+        
+        if (habitacion != null && habitacion.estaOcupada()) {
+           
+           if(tipo.equals("MINIBAR") ){
+               
+               for (int j = 0; j < habitacion.minibar.productos.size(); j++) {
+                   if(habitacion.minibar.productos.get(j).getNombre().equals(Producto)){
+                       habitacion.productos_usados.add(habitacion.minibar.productos.get(j));
+                       habitacion.minibar.productos.remove(j);
+                       res = true;
+                       break;
+                   }
+               }
+               
+           }else{
+                switch (Producto) {
+                   case "DESAYUNO":
+                       habitacion.productos_usados.add(Restaurante.desayuno);
+                       break;
+                   case "CENA":
+                       habitacion.productos_usados.add(Restaurante.cena);
+                       break;
+                   case "ALMUERZO":
+                       habitacion.productos_usados.add(Restaurante.almuerzo);
+                       break;
+                   case "SERVICIO_HABITACION":
+                       habitacion.productos_usados.add(Restaurante.servicio_habitacion);
+                       break;
+               }
+               res = true;
+           }
+           
+        } else {
+            System.out.println("La habitación no está ocupada.");
+        }
+        return res;
+    }
 }
 
 class Minibar {
@@ -144,7 +190,7 @@ class Minibar {
     private static final double PRECIO_KIT_ASEO = 9000;
     private static final double PRECIO_AGUA = 3500;
     private static final double PRECIO_GASEOSA = 3000;
-    private static final double PRECIO_BATA = 70000;
+    private final static double PRECIO_BATA = 70000;
     
     private int licores;
     private int agua;
@@ -158,7 +204,7 @@ class Minibar {
     public final String KITASEO = "KITASEO";
     public final String GASEOSAS = "GASEOSAS";
     public final String VINO = "VINO";
-    public final String BATA = "BATA";
+    public final static String BATA = "BATA";
    
     public List<Producto> productos;
 
@@ -213,10 +259,6 @@ class Factura {
     private Habitacion habitacion;
     private int diasEstadia;
     private double total;
-    
-    public double getTotal(){
-        return total;
-    }
 
     public Factura( Habitacion habitacion, int diasEstadia) {
         this.nombreHuesped = habitacion.getNombre();
@@ -261,7 +303,7 @@ class Recepcion {
         for (int piso = 2; piso <= 4; piso++) {
             for (int i = 1; i <= 10; i++) {
                 int numero = piso * 100 + i;
-                habitaciones.put(numero, new Habitacion(numero, piso, "Sencilla", 200000, "Tiene 1 cama doble o dos sencillas", null));
+                //habitaciones.put(numero, new Habitacion(numero, piso, "Sencilla", 200000, "Tiene 1 cama doble o dos sencillas", null));
                 habitaciones_list.add(new Habitacion(numero, piso, "Sencilla", 200000, "Tiene 1 cama doble o dos sencillas", null));
             }
         }
@@ -274,7 +316,7 @@ class Recepcion {
             for (Producto producto : minibarEjecutiva.productos) {
                 System.out.println("- " + producto.getNombre() + ": $" + producto.getPrecio() + " indice "+ producto );
             }
-            habitaciones.put(numero, new Habitacion(numero, 5, "Ejecutiva", 350000, "Tiene 1 cama doble o dos sencillas", minibarEjecutiva));
+            //habitaciones.put(numero, new Habitacion(numero, 5, "Ejecutiva", 350000, "Tiene 1 cama doble o dos sencillas", minibarEjecutiva));
             habitaciones_list.add(new Habitacion(numero, 5, "Ejecutiva", 350000, "Tiene 1 cama queen o dos semidobles, además tiene minibar compuesto por 4 botellas de licor, dos botellas de agua, 1 kit de aseo personal, 2 gaseosas.", minibarEjecutiva));
         }
 
@@ -282,52 +324,9 @@ class Recepcion {
         for (int i = 1; i <= 5; i++) {
             int numero = 600 + i;
             Minibar minibarSuite = new Minibar(4, 0, 3, 4, 1,2);
-            habitaciones.put(numero, new Habitacion(numero, 6, "Suite", 500000,"Tiene 1 cama King, o una cama queen y una semidoble. Además tiene un minibar compuesto por una botella de vino, 4 botellas de licor, 3 kit de aseo personal, 4 gaseosas. Tiene también un juego de 2 batas de baño. ", minibarSuite));
+            //habitaciones.put(numero, new Habitacion(numero, 6, "Suite", 500000,"Tiene 1 cama King, o una cama queen y una semidoble. Además tiene un minibar compuesto por una botella de vino, 4 botellas de licor, 3 kit de aseo personal, 4 gaseosas. Tiene también un juego de 2 batas de baño. ", minibarSuite));
             habitaciones_list.add(new Habitacion(numero, 6, "Suite", 500000,"Tiene 1 cama King, o una cama queen y una semidoble. Además tiene un minibar compuesto por una botella de vino, 4 botellas de licor, 3 kit de aseo personal, 4 gaseosas. Tiene también un juego de 2 batas de baño. ", minibarSuite));
         }
-    }
-   
-    public boolean agregarProducto(String tipo, String Producto,int numeroHabitacion){
-        Habitacion habitacion = habitaciones.get(numeroHabitacion);
-        
-        boolean res = true;
-        
-        if (habitacion != null && habitacion.estaOcupada()) {
-           
-           if(tipo.equals("MINIBAR") ){
-               
-               for (int j = 0; j < habitacion.minibar.productos.size(); j++) {
-                   if(habitacion.minibar.productos.get(j).getNombre().equals(Producto)){
-                       habitacion.productos_usados.add(habitacion.minibar.productos.get(j));
-                       habitacion.minibar.productos.remove(j);
-                   }else{
-                       res = false;
-                   }
-               }
-               
-           }else{
-                switch (Producto) {
-                   case "DESAYUNO":
-                       habitacion.productos_usados.add(Restaurante.desayuno);
-                       break;
-                   case "CENA":
-                       habitacion.productos_usados.add(Restaurante.cena);
-                       break;
-                   case "ALMUERZO":
-                       habitacion.productos_usados.add(Restaurante.almuerzo);
-                       break;
-                   case "SERVICIO_HABITACION":
-                       habitacion.productos_usados.add(Restaurante.servicio_habitacion);
-                       break;
-                   default:
-                       res = false;
-               }
-           }
-           
-        } else {
-            System.out.println("La habitación no está ocupada.");
-        }
-        return res;
     }
    
     public void checkIn(String nombreHuesped, String idHuesped, Habitacion habitacion) {

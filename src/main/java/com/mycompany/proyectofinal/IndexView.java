@@ -21,8 +21,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 @Route("")
 public class IndexView extends VerticalLayout{
@@ -49,6 +51,29 @@ public class IndexView extends VerticalLayout{
         
     }
     
+    public ArrayList<Button> listProductosVenta(Habitacion habitacion, BiConsumer<ClickEvent<Button>, Producto> callback){
+        ArrayList btnList = new ArrayList<>();
+        
+        if(habitacion.minibar != null){
+            for (int i = 0; i < habitacion.minibar.productos.size(); i++) {
+               Producto producto = habitacion.minibar.productos.get(i);
+               Button boton = new Button(producto.getNombre());
+                      boton.addClickListener(event -> callback.accept(event, producto));
+               btnList.add(boton);
+           }
+          
+        }else{
+            btnList.add(new Button("BATA",(event) -> callback.accept(event, new Producto(Minibar.BATA,70000,"MINIBAR") )));
+        }
+         
+         Restaurante restaurante = new Restaurante();
+         btnList.add(new Button("DESAYUNO",event -> callback.accept(event, Restaurante.desayuno )));
+         btnList.add(new Button("ALMUERZO",event -> callback.accept(event, Restaurante.almuerzo )));
+         btnList.add(new Button("CENA",event -> callback.accept(event, Restaurante.cena )));
+         btnList.add(new Button("SERVICIO_HABITACION",event -> callback.accept(event, Restaurante.servicio_habitacion )));
+         
+        return btnList;
+    }
     
     public VerticalLayout pintarHabitacionesPorPiso(List<Integer> pisos ){
         
@@ -81,7 +106,41 @@ public class IndexView extends VerticalLayout{
                             
                             Button cancelBtn = new Button("Cancelar",  new Icon(VaadinIcon.BAN), (e) -> dialogOcupada.close());
                             Button agregaProductoBtn = new Button("Agregar Producto a la cuenta", new Icon(VaadinIcon.PLUS) , (e) ->{
-                            
+                                dialogOcupada.close();
+                                Dialog dialogAdd = new Dialog();
+                                dialogAdd.setHeaderTitle("Habitación "+habitacion.getNumero()+" "+habitacion.getTipo()+" | OCUPADA");
+                                
+                                    VerticalLayout containerProductosCuenta = new VerticalLayout();
+                                
+                                containerProductosCuenta.add(new Text("Cliente: "+habitacion.getNombre()+" | "+habitacion.getIdCliente()));
+                                
+                                Text totalText = new Text("  Total cuenta: $"+habitacion.getTotalProductos() );
+                                
+                                containerProductosCuenta.add(totalText);
+                                
+                                ArrayList btnList = new ArrayList<Button>();
+                                
+                                btnList = listProductosVenta(habitacion,(event,producto) -> {
+                                   boolean agregar =  habitacion.agregarProducto(producto.getTipo(), producto.getNombre(), habitacion);
+                                   if(agregar){
+                                       mostrarNotificacion("bien", "Agregado correctamente");
+                                       if(producto.getTipo().equals("MINIBAR")){
+                                           Button thisButton = (Button) event.getSource();
+                                           remove(thisButton);
+                                       }
+                                   }else{
+                                       mostrarNotificacion("error", "El producto no se puede agregar, no está en el minivar o disponible");
+                                   }
+                                   totalText.setText(" Total cuenta: $"+habitacion.getTotalProductos() );
+                                   
+                                });
+                                
+                                containerProductosCuenta.add(btnList);
+                                
+                                dialogAdd.add(containerProductosCuenta);
+                                Button cerrar = new Button("Cancelar",new Icon(VaadinIcon.BAN), (ev) -> dialogAdd.close());
+                                dialogAdd.getFooter().add( cerrar );
+                                dialogAdd.open();
                             } );
                             Button hacerCheckoutBtn = new Button("Hacer checkout", new Icon(VaadinIcon.CHECK_CIRCLE));
                             
@@ -90,7 +149,7 @@ public class IndexView extends VerticalLayout{
                             dialogOcupada.getFooter().add(hacerCheckoutBtn);
                             dialogOcupada.open();
                             
-                            mostrarNotificacion("error", "Ya se encuentra ocupada la habitación");
+                            
                         }else{
                             Dialog dialog = new Dialog();
                             dialog.setHeaderTitle("Habitación "+habitacion.getNumero()+" "+habitacion.getTipo()+" Disponible");
