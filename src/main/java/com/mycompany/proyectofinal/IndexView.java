@@ -96,6 +96,7 @@ public class IndexView extends HorizontalLayout{
             }else{
                 mostrarFacturaDialogo(habitacion, numeroNoches.getValue(),card );
                 habitacionBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+                habitacionBtn.removeThemeVariants(ButtonVariant.LUMO_ERROR);
                 habitacion.desocupar();
                 mostrarNotificacion("bien", "Gracias por su estadía vuelva pronto");  
             }
