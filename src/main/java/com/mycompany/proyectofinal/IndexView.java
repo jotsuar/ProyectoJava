@@ -8,8 +8,10 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -19,6 +21,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.Page;
+import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import java.util.ArrayList;
@@ -27,7 +30,7 @@ import java.util.Arrays;
 import java.util.function.BiConsumer;
 
 @Route("")
-public class IndexView extends VerticalLayout{
+public class IndexView extends HorizontalLayout{
     
     public Hotel hotel;
     
@@ -35,20 +38,65 @@ public class IndexView extends VerticalLayout{
            
         hotel = new Hotel();
         
-        var titulo = new H1("Hotel universitario");
-        add(titulo);
         
-        VerticalLayout layout = new VerticalLayout();
-        List<Integer> primeros_pisos = Arrays.asList(2, 3, 4,5,6);
-        layout.add(pintarHabitacionesPorPiso(primeros_pisos));
-       
-            Scroller scroller = new Scroller(layout);
-            //scroller.setMaxWidth(5000, Unit.PIXELS);
-            //scroller.setScrollDirection(Scroller.ScrollDirection.HORIZONTAL);
+        
+            VerticalLayout contenedorHabitaciones = new VerticalLayout();
 
-        
+            var titulo = new H1("Hotel universitario");
+            contenedorHabitaciones.add(titulo);
+            List<Integer> primeros_pisos = Arrays.asList(2, 3, 4,5,6);
+            contenedorHabitaciones.add(pintarHabitacionesPorPiso(primeros_pisos));
+
+                Scroller scroller = new Scroller(contenedorHabitaciones);
+                //scroller.setMaxWidth(5000, Unit.PIXELS);
+                //scroller.setScrollDirection(Scroller.ScrollDirection.HORIZONTAL);
+
+
         add(scroller);
+        CheckoutView();
+        /*Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Prueba de título");
+        dialog.setModal(false);
+        dialog.open();*/
         
+    }
+    
+    public void CheckoutView() {
+        // Crear el título del Card
+        H3 titulo = new H3("Checkout habitación XXX");
+
+        // Detalles del cliente
+        TextField nombreCliente = new TextField("Nombre del Cliente");
+        nombreCliente.setReadOnly(true);
+        TextField idCliente = new TextField("Identificación");
+        idCliente.setReadOnly(true);
+        FormLayout detallesCliente = new FormLayout(nombreCliente, idCliente);
+
+        // Listado de servicios comprados
+        VerticalLayout listaServicios = new VerticalLayout();
+        listaServicios.add(new Label("Servicios Comprados:"));
+        listaServicios.add(new Label("1. Servicio de limpieza"));
+        listaServicios.add(new Label("2. Servicio de lavandería"));
+        listaServicios.add(new Label("3. Desayuno incluido"));
+        // Agrega más servicios según sea necesario
+
+        // Campo para ingresar número de noches y botón para generar factura
+        NumberField numeroNoches = new NumberField("Número de Noches");
+        Button generarFacturaButton = new Button("Generar Factura" /*event -> mostrarFacturaDialogo(nombreCliente.getValue(), idCliente.getValue(), numeroNoches.getValue())*/);
+        generarFacturaButton.getStyle().set("margin-top", "35px");
+        HorizontalLayout generarFacturaLayout = new HorizontalLayout(numeroNoches, generarFacturaButton);
+
+        // Card principal
+        VerticalLayout card = new VerticalLayout(titulo, detallesCliente, listaServicios, generarFacturaLayout);
+        card.getStyle().set("border", "1px solid #ccc"); // Borde para simular Card
+        card.getStyle().set("border-radius", "8px");
+        card.getStyle().set("padding", "20px");
+        card.getStyle().set("width", "600px");
+        card.getStyle().set("height", "900px");
+        card.getStyle().set("box-shadow", "2px 2px 10px rgba(0, 0, 0, 0.1)");
+
+        // Añadir el Card al layout principal
+        add(card);
     }
     
     public ArrayList<Button> listProductosVenta(Habitacion habitacion, BiConsumer<ClickEvent<Button>, Producto> callback){
@@ -153,6 +201,7 @@ public class IndexView extends VerticalLayout{
                         }else{
                             Dialog dialog = new Dialog();
                             dialog.setHeaderTitle("Habitación "+habitacion.getNumero()+" "+habitacion.getTipo()+" Disponible");
+                            dialog.add(new Text("Precio noche: $"+habitacion.getPrecioNoche()+ " | "));
                             dialog.add(new Text(habitacion.getDetalles()));
 
                             Button cancelBtn = new Button("Cancelar",  new Icon(VaadinIcon.BAN));
