@@ -70,8 +70,10 @@ class Habitacion {
     private int piso;
     private boolean ocupada;
     private String tipo;
+    private String nombreCliente;
     private double precioNoche;
     public Minibar minibar;
+    private String idCliente;
    
     public List<Producto> productos_usados;
 
@@ -87,7 +89,9 @@ class Habitacion {
         this.ocupada = false;
     }
 
-    public void ocupar() {
+    public void ocupar(String nombreCliente, String idCliente) {
+        nombreCliente = nombreCliente;
+        idCliente = idCliente;
         ocupada = true;
     }
 
@@ -126,28 +130,32 @@ class Minibar {
     private static final double PRECIO_KIT_ASEO = 9000;
     private static final double PRECIO_AGUA = 3500;
     private static final double PRECIO_GASEOSA = 3000;
-
+    private static final double PRECIO_BATA = 70000;
+    
     private int licores;
     private int agua;
     private int kitsAseo;
     private int gaseosas;
     private int vino;
+    private int batas;
    
     public final String LICORES = "LICORES";
     public final String AGUA = "AGUA";
     public final String KITASEO = "KITASEO";
     public final String GASEOSAS = "GASEOSAS";
     public final String VINO = "VINO";
+    public final String BATA = "BATA";
    
     public List<Producto> productos;
 
 
-    public Minibar(int licores, int agua, int kitsAseo, int gaseosas, int vino) {
+    public Minibar(int licores, int agua, int kitsAseo, int gaseosas, int vino, int batas) {
         this.licores = licores;
         this.agua = agua;
         this.kitsAseo = kitsAseo;
         this.gaseosas = gaseosas;
         this.vino = vino;
+        this.batas = batas;
        
         this.productos = new ArrayList<>();
 
@@ -171,6 +179,10 @@ class Minibar {
         for (int i = 0; i < vino; i++) {
             productos.add( new Producto(VINO,PRECIO_VINO,"MINIBAR") );
         }
+        
+        for (int i = 0; i < batas; i++) {
+            productos.add( new Producto(BATA,PRECIO_BATA,"MINIBAR") );
+        }
        
     }
    
@@ -193,7 +205,7 @@ class Factura {
         this.idHuesped = idHuesped;
         this.habitacion = habitacion;
         this.diasEstadia = diasEstadia;
-        this.total = (diasEstadia * habitacion.getPrecioNoche()) + habitacion.calcularCostoMinibar() ;
+        this.total = (diasEstadia * habitacion.getPrecioNoche()) ;
        
         for (Producto producto : habitacion.productos_usados) {
             total += producto.getPrecio();
@@ -239,7 +251,7 @@ class Recepcion {
         // Crear 10 habitaciones ejecutivas en piso 5
         for (int i = 1; i <= 10; i++) {
             int numero = 500 + i;
-            Minibar minibarEjecutiva = new Minibar(4, 2, 1, 2, 0);
+            Minibar minibarEjecutiva = new Minibar(4, 2, 1, 2, 0,0);
            
             for (Producto producto : minibarEjecutiva.productos) {
                 System.out.println("- " + producto.getNombre() + ": $" + producto.getPrecio() + " indice "+ producto );
@@ -251,13 +263,13 @@ class Recepcion {
         // Crear 5 suites en piso 6
         for (int i = 1; i <= 5; i++) {
             int numero = 600 + i;
-            Minibar minibarSuite = new Minibar(4, 0, 3, 4, 1);
+            Minibar minibarSuite = new Minibar(4, 0, 3, 4, 1,2);
             habitaciones.put(numero, new Habitacion(numero, 6, "Suite", 500000, minibarSuite));
             habitaciones_list.add(new Habitacion(numero, 6, "Suite", 500000, minibarSuite));
         }
     }
    
-    public void agregarProducto(String tipo, String Producto, String idHuesped,int numeroHabitacion){
+    public void agregarProducto(String tipo, String Producto,int numeroHabitacion){
         Habitacion habitacion = habitaciones.get(numeroHabitacion);
         if (habitacion != null && habitacion.estaOcupada()) {
            
@@ -297,7 +309,7 @@ class Recepcion {
    
     public void checkIn(String nombreHuesped, String idHuesped, Habitacion habitacion) {
         if (habitacion != null && !habitacion.estaOcupada()) {
-            habitacion.ocupar();
+            habitacion.ocupar(nombreHuesped,idHuesped);
             System.out.println("Check-in exitoso para " + nombreHuesped + " en la habitación " + habitacion.getNumero());
         } else {
             System.out.println("La habitación no está disponible.");
