@@ -73,10 +73,28 @@ public class IndexView extends VerticalLayout{
                     habitacionBtn.addClickListener( clicEvent -> {
                          
                         if(habitacion.estaOcupada()){
+                            
+                            /* Dialogo para cuando está ocupada */
+                            Dialog dialogOcupada = new Dialog();
+                            dialogOcupada.setHeaderTitle("Habitación "+habitacion.getNumero()+" "+habitacion.getTipo()+" | OCUPADA");
+                            dialogOcupada.add(new Text("Cliente: "+habitacion.getNombre()+" | "+habitacion.getIdCliente()));
+                            
+                            Button cancelBtn = new Button("Cancelar",  new Icon(VaadinIcon.BAN), (e) -> dialogOcupada.close());
+                            Button agregaProductoBtn = new Button("Agregar Producto a la cuenta", new Icon(VaadinIcon.PLUS) , (e) ->{
+                            
+                            } );
+                            Button hacerCheckoutBtn = new Button("Hacer checkout", new Icon(VaadinIcon.CHECK_CIRCLE));
+                            
+                            dialogOcupada.getFooter().add(cancelBtn);
+                            dialogOcupada.getFooter().add(agregaProductoBtn);
+                            dialogOcupada.getFooter().add(hacerCheckoutBtn);
+                            dialogOcupada.open();
+                            
                             mostrarNotificacion("error", "Ya se encuentra ocupada la habitación");
                         }else{
                             Dialog dialog = new Dialog();
                             dialog.setHeaderTitle("Habitación "+habitacion.getNumero()+" "+habitacion.getTipo()+" Disponible");
+                            dialog.add(new Text(habitacion.getDetalles()));
 
                             Button cancelBtn = new Button("Cancelar",  new Icon(VaadinIcon.BAN));
                             cancelBtn.addClickListener((e) -> dialog.close());
